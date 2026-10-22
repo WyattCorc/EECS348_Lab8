@@ -7,14 +7,13 @@
 
 using namespace std;
 
-// ---------- Number representation ----------
+
 struct Num {
     bool neg = false;
     string digits;      // all digits, decimal point removed
-    size_t fracLen = 0; // how many of the trailing digits are fractional
+    size_t fracLen = 0; 
 };
 
-// ---------- Validation / parsing ----------
 bool isValidString(const string& s) {
     size_t i = 0;
     if (i < s.size() && (s[i] == '+' || s[i] == '-')) i++;
@@ -22,9 +21,9 @@ bool isValidString(const string& s) {
     size_t intDigits = 0;
     while (i < s.size() && isdigit(static_cast<unsigned char>(s[i]))) { i++; intDigits++; }
     if (intDigits == 0) return false;          // rejects ".5", "A", "+-1"
-    if (i == s.size()) return true;            // plain integer
+    if (i == s.size()) return true;            
 
-    if (s[i] != '.') return false;             // rejects "1e3"
+    if (s[i] != '.') return false;
     i++;
 
     size_t fracDigits = 0;
@@ -47,7 +46,6 @@ Num parseNum(const string& s) {
     return n;
 }
 
-// ---------- Magnitude helpers (digit strings, no sign, no dot) ----------
 string stripZeros(const string& s) {
     size_t p = s.find_first_not_of('0');
     return (p == string::npos) ? "0" : s.substr(p);
@@ -107,7 +105,7 @@ string mulMag(const string& a, const string& b) {
     return stripZeros(result);
 }
 
-// ---------- Signed operations ----------
+// Signing operators 
 void alignDecimals(Num& a, Num& b) {
     while (a.fracLen < b.fracLen) { a.digits += '0'; a.fracLen++; }
     while (b.fracLen < a.fracLen) { b.digits += '0'; b.fracLen++; }
@@ -129,7 +127,7 @@ string formatNum(Num n) {
     bool isZero = (out.find_first_not_of("0.") == string::npos);
     return (n.neg && !isZero ? "-" : "") + out;
 }
-
+//Runs all the operators by doing addition of the strings
 string addNums(Num a, Num b) {
     alignDecimals(a, b);
     Num r;
@@ -145,17 +143,17 @@ string addNums(Num a, Num b) {
     }
     return formatNum(r);
 }
-
+//runs addition as normal
 string addStrings(const string& n1, const string& n2) {
     return addNums(parseNum(n1), parseNum(n2));
 }
-
+//Subtraction is addition with flipped operator
 string subtractStrings(const string& n1, const string& n2) {
     Num b = parseNum(n2);
     b.neg = !b.neg;
     return addNums(parseNum(n1), b);
 }
-
+//repeated addition is multiplication
 string multiplyStrings(const string& n1, const string& n2) {
     Num a = parseNum(n1), b = parseNum(n2), r;
     r.digits = mulMag(a.digits, b.digits);
@@ -164,7 +162,7 @@ string multiplyStrings(const string& n1, const string& n2) {
     return formatNum(r);
 }
 
-// ---------- Shared dispatcher ----------
+//Reads the operators
 string compute(const string& a, const string& b, const string& op, bool& ok) {
     ok = true;
     if (op == "+") return addStrings(a, b);
@@ -174,7 +172,7 @@ string compute(const string& a, const string& b, const string& op, bool& ok) {
     return "";
 }
 
-// ---------- File processing: each line is "num1 num2 [op]" (op defaults to +) ----------
+//File I/O managment
 void processFile(const string& filename) {
     ifstream file(filename);
     if (!file.is_open()) {
